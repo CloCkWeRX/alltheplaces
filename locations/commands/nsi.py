@@ -4,6 +4,11 @@ from scrapy.exceptions import UsageError
 from locations.commands.duplicate_wikidata import DuplicateWikidataCommand
 from locations.name_suggestion_index import NSI
 
+from scrapy import signals
+from scrapy.utils.project import get_project_settings
+from scrapy.crawler import CrawlerProcess
+
+from locations.storefinder_detector_spider import StorefinderDetectorSpider
 
 class NameSuggestionIndexCommand(ScrapyCommand):
     """
@@ -70,6 +75,10 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 print("       -> " + str(item))
 
     def detect_missing(self, args):
+        settings = get_project_settings()
+        settings.set("ITEM_PIPELINES", {})
+        settings.set("FEED_EXPORTERS", {})
+        settings.set("LOG_LEVEL", "ERROR")
         codes = {}
         for spider_name in self.crawler_process.spider_loader.list():
             props = DuplicateWikidataCommand.spider_properties(spider_name)
@@ -96,6 +105,8 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 # Sometimes, we don't get a wikidata match. For now, skip
                 continue
 
+            process = CrawlerProcess(settings)
+
             # Determine various websites
             website_urls = []
             if s := wikidata.get("identities"):
@@ -105,10 +116,26 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 for website in set(s):
                     website_urls.append(website)
             website_urls = set(website_urls)
+        
+            crawler = process.create_crawler(StorefinderDetectorSpider)
+            crawler.signals.connect(self.print_spider_code, signal=signals.item_scraped)
+            for website in website_urls:
+                process.crawl(
+                    crawler,
+                    url=website,
+                    brand_wikidata=brand["tags"]["brand:wikidata"],
+                )
 
             self.issue_template(
-                brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata, website_urls
+                brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata, process
             )
+
+    def print_spider_code(self, item):
+        for base_class in item["spider"].__bases__:
+            if not callable(getattr(base_class, "generate_spider_code")):
+                continue
+            print(base_class.generate_spider_code(item["spider"]))
+            break
 
     @staticmethod
     def show(code, data):
@@ -121,7 +148,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             print("       -> {}".format(s.get("website", "N/A")))
 
     @staticmethod
-    def issue_template(code, data, website_urls):
+    def issue_template(code, data, process):
         print("### Brand name\n")
         print(data["label"])
         print("")
@@ -132,25 +159,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         print("https://www.wikidata.org/wiki/{}".format(code))
         print("https://www.wikidata.org/wiki/Special:EntityData/{}.json\n".format(code))
         print("### Store finder url(s)\n")
-        for website in website_urls:
-            print("Official Url(s): {}".format(website))
-            print("- [ ] I have run the below and if anything in generated, added it.")
-            print("- [ ] I have manually checked for a storefinder")
-            print(
-                "- [ ] This is not a manufacturer listing outlets operating under their own brands / this will not create duplicates"
-            )
-            print("`{}`".format(" ".join(["pipenv run scrapy sf", "--brand-wikidata={}".format(code), website])))
-            print("```")
-            # Now, we crawl!
-            # TODO: The subprocess gets ModuleNotFoundError: No module named 'locations', despite the current working dir and shell=True being passed.
-            # What's missing? Why doesn't the pipenv execution know where we are?
-
-            # Why a subprocess?
-            # There are issues with reactor trying to do this all inline; global state; the on the fly class definitions...
-            # so just call the storefinder command as a subprocess.
-            # result = subprocess.run(['pipenv run scrapy sf', '--brand-wikidata={}'.format(code), website], shell=True, cwd=os.getcwd())
-            # print(result.stdout)
-            print("```")
+        process.start() # This results in twisted.internet.error.ReactorNotRestartable; okay fair enough.
 
         print("")
         print("----")
