@@ -7,7 +7,6 @@ from scrapy.exceptions import UsageError
 from locations.commands.duplicate_wikidata import DuplicateWikidataCommand
 from locations.name_suggestion_index import NSI
 
-<<<<<<< HEAD
 from scrapy import signals
 from scrapy.utils.project import get_project_settings
 from scrapy.crawler import CrawlerProcess
@@ -16,8 +15,6 @@ from multiprocessing import Process, Queue
 from locations.storefinder_detector_spider import StorefinderDetectorSpider
 import subprocess
 import os
-=======
->>>>>>> storefinder-detector
 
 class NameSuggestionIndexCommand(ScrapyCommand):
     """
