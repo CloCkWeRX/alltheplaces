@@ -10,6 +10,8 @@ from scrapy.crawler import CrawlerProcess
 from multiprocessing import Process, Queue
 
 from locations.storefinder_detector_spider import StorefinderDetectorSpider
+import subprocess
+import os
 
 class NameSuggestionIndexCommand(ScrapyCommand):
     """

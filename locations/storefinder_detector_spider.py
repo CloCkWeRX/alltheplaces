@@ -9,6 +9,7 @@ from scrapy.http import Request, Response
 from locations.automatic_spider_generator import AutomaticSpiderGenerator
 from locations.items import GeneratedSpider
 from locations.name_suggestion_index import NSI
+from locations.storefinders import *
 from locations.user_agents import BROWSER_DEFAULT
 
 
@@ -134,12 +135,13 @@ class StorefinderDetectorSpider(Spider):
                 if [base for base in cls.__bases__ if base.__name__ == AutomaticSpiderGenerator.__name__]
             ]
         ]
+        if len(all_storefinders) == 0:
+            raise Exception("No storefinders discovered. Has the CI bot removed the loading again?")
         print(all_storefinders)
         detection_results = [
             (storefinder, storefinder.storefinder_exists(response)) for storefinder in all_storefinders
         ]
 
-        print(all_storefinders)
         detected_storefinders = [storefinder[0] for storefinder in detection_results if storefinder[1] is True]
         print(detected_storefinders)
         for detected_storefinder in detected_storefinders:
@@ -147,19 +149,19 @@ class StorefinderDetectorSpider(Spider):
             response.meta["first_response"] = response
             response.meta["first_response"].meta["storefinder"] = detected_storefinder
             yield from self.parse_detection(response)
-        # additional_requests = [result for result in detection_results if isinstance(result[1], Request)]
-        # for additional_request in additional_requests:
-        #     additional_request[1].meta["storefinder"] = additional_request[0]
-        #     additional_request[1].meta["first_response"] = response
-        #     additional_request[1].meta["first_response"].meta["storefinder"] = additional_request[0]
-        #     additional_request[1].callback = self.parse_detection
-        #     yield additional_request[1]
+        additional_requests = [result for result in detection_results if isinstance(result[1], Request)]
+        for additional_request in additional_requests:
+            additional_request[1].meta["storefinder"] = additional_request[0]
+            additional_request[1].meta["first_response"] = response
+            additional_request[1].meta["first_response"].meta["storefinder"] = additional_request[0]
+            additional_request[1].callback = self.parse_detection
+            yield additional_request[1]
 
     def parse_detection(self, response: Response):
         storefinder = response.meta["storefinder"]
         next_detection_method = response.meta.get("next_detection_method", storefinder.storefinder_exists)
         storefinder_exists = next_detection_method(response)
-        if True:
+        if isinstance(storefinder_exists, Request):
             print("We found a store finder (1)")
             print(response)
             print(response.meta["first_response"])
@@ -170,7 +172,7 @@ class StorefinderDetectorSpider(Spider):
             yield storefinder_exists
             return
 
-        if True:
+        if storefinder_exists is True:
             print("We found a store finder (2)")
             print(response)
             print(response.meta["first_response"])
