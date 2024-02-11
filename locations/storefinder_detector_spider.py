@@ -176,6 +176,8 @@ class StorefinderDetectorSpider(Spider):
             print("We found a store finder (2)")
             print(response)
             print(response.meta["first_response"])
+            print("Should this look at last_response?")
+            print(response.meta["last_response"])
 
             yield from self.parse_extraction(
                 response.meta["first_response"]
