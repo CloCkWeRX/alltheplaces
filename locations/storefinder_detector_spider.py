@@ -125,6 +125,7 @@ class StorefinderDetectorSpider(Spider):
                 self.parameters["operator"] = operator
 
     def parse(self, response: Response):
+        print("Parsing response")
         all_storefinders = [
             storefinder
             for storefinder in [
@@ -133,34 +134,47 @@ class StorefinderDetectorSpider(Spider):
                 if [base for base in cls.__bases__ if base.__name__ == AutomaticSpiderGenerator.__name__]
             ]
         ]
+        print(all_storefinders)
         detection_results = [
             (storefinder, storefinder.storefinder_exists(response)) for storefinder in all_storefinders
         ]
+
+        print(all_storefinders)
         detected_storefinders = [storefinder[0] for storefinder in detection_results if storefinder[1] is True]
+        print(detected_storefinders)
         for detected_storefinder in detected_storefinders:
             response.meta["storefinder"] = detected_storefinder
             response.meta["first_response"] = response
             response.meta["first_response"].meta["storefinder"] = detected_storefinder
             yield from self.parse_detection(response)
-        additional_requests = [result for result in detection_results if isinstance(result[1], Request)]
-        for additional_request in additional_requests:
-            additional_request[1].meta["storefinder"] = additional_request[0]
-            additional_request[1].meta["first_response"] = response
-            additional_request[1].meta["first_response"].meta["storefinder"] = additional_request[0]
-            additional_request[1].callback = self.parse_detection
-            yield additional_request[1]
+        # additional_requests = [result for result in detection_results if isinstance(result[1], Request)]
+        # for additional_request in additional_requests:
+        #     additional_request[1].meta["storefinder"] = additional_request[0]
+        #     additional_request[1].meta["first_response"] = response
+        #     additional_request[1].meta["first_response"].meta["storefinder"] = additional_request[0]
+        #     additional_request[1].callback = self.parse_detection
+        #     yield additional_request[1]
 
     def parse_detection(self, response: Response):
         storefinder = response.meta["storefinder"]
         next_detection_method = response.meta.get("next_detection_method", storefinder.storefinder_exists)
         storefinder_exists = next_detection_method(response)
-        if isinstance(storefinder_exists, Request):
+        if True:
+            print("We found a store finder (1)")
+            print(response)
+            print(response.meta["first_response"])
+
             storefinder_exists.meta["storefinder"] = storefinder
             storefinder_exists.meta["first_response"] = response.meta.get("first_response")
             storefinder_exists.callback = self.parse_detection
             yield storefinder_exists
             return
-        if storefinder_exists is True:
+
+        if True:
+            print("We found a store finder (2)")
+            print(response)
+            print(response.meta["first_response"])
+
             yield from self.parse_extraction(
                 response.meta["first_response"]
             )  # TODO: Check if first_response is right, or if it should be last_response. When running multiple times for multiple stores, I was seeing the current url with the first generated spider
@@ -174,6 +188,7 @@ class StorefinderDetectorSpider(Spider):
             spider_attributes.callback = self.parse_extraction
             yield spider_attributes
             return
+        print("Building a new spider")
         new_spider = type(
             self.parameters["spider_class_name"],
             (storefinder,),
@@ -186,6 +201,7 @@ class StorefinderDetectorSpider(Spider):
             spider_key=self.parameters["spider_key"],
             extracted_attributes=spider_attributes,
         )
+        print("URL: {} gives us {}".format(response.url, new_spider))
         generated_spider = GeneratedSpider()
         generated_spider["search_url"] = response.url
         generated_spider["spider"] = new_spider

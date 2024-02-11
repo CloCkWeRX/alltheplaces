@@ -38,7 +38,6 @@ class StorepointSpider(Spider, AutomaticSpiderGenerator):
 
     @staticmethod
     def storefinder_exists(response: Response) -> bool:
-        return True
         if len(response.xpath('//div[@id="storepoint-container"]/@data-map-id')) > 0:
             return True
         return False

@@ -63,6 +63,7 @@ class AgileStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
 
     @staticmethod
     def storefinder_exists(response: Response) -> bool:
+        return True
         if len(response.xpath('//*[contains(@id, "agile-store-locator-")]')) > 0:
             return True
         return False

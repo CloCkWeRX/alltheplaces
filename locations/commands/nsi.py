@@ -7,6 +7,7 @@ from locations.name_suggestion_index import NSI
 from scrapy import signals
 from scrapy.utils.project import get_project_settings
 from scrapy.crawler import CrawlerProcess
+from multiprocessing import Process, Queue
 
 from locations.storefinder_detector_spider import StorefinderDetectorSpider
 
@@ -75,10 +76,6 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 print("       -> " + str(item))
 
     def detect_missing(self, args):
-        settings = get_project_settings()
-        settings.set("ITEM_PIPELINES", {})
-        settings.set("FEED_EXPORTERS", {})
-        settings.set("LOG_LEVEL", "ERROR")
         codes = {}
         for spider_name in self.crawler_process.spider_loader.list():
             props = DuplicateWikidataCommand.spider_properties(spider_name)
@@ -99,13 +96,13 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 if not item["tags"]["brand:wikidata"] in codes.keys():
                     missing.append(item)
         print(f"Missing by wikidata: {len(missing)}")
+
         for brand in missing:
             wikidata = self.nsi.lookup_wikidata(brand["tags"]["brand:wikidata"])
             if wikidata is None:
                 # Sometimes, we don't get a wikidata match. For now, skip
                 continue
 
-            process = CrawlerProcess(settings)
 
             # Determine various websites
             website_urls = []
@@ -117,25 +114,9 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                     website_urls.append(website)
             website_urls = set(website_urls)
         
-            crawler = process.create_crawler(StorefinderDetectorSpider)
-            crawler.signals.connect(self.print_spider_code, signal=signals.item_scraped)
-            for website in website_urls:
-                process.crawl(
-                    crawler,
-                    url=website,
-                    brand_wikidata=brand["tags"]["brand:wikidata"],
-                )
-
             self.issue_template(
-                brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata, process
+                brand["tags"]["brand:wikidata"], brand | {"label": brand["displayName"]} | wikidata, website_urls
             )
-
-    def print_spider_code(self, item):
-        for base_class in item["spider"].__bases__:
-            if not callable(getattr(base_class, "generate_spider_code")):
-                continue
-            print(base_class.generate_spider_code(item["spider"]))
-            break
 
     @staticmethod
     def show(code, data):
@@ -148,7 +129,25 @@ class NameSuggestionIndexCommand(ScrapyCommand):
             print("       -> {}".format(s.get("website", "N/A")))
 
     @staticmethod
-    def issue_template(code, data, process):
+    def issue_template(code, data, website_urls):
+        def run_in_background_process(q, process):
+            try:
+                print("Crawling!")
+                print(process)
+                process.start()
+                q.put(None)
+            except Exception as e:
+                print(e)
+                q.put(e)
+
+        def print_spider_code(self, item):
+            print("Spider detected, woo")
+            for base_class in item["spider"].__bases__:
+                if not callable(getattr(base_class, "generate_spider_code")):
+                    continue
+                print(base_class.generate_spider_code(item["spider"]))
+                break
+
         print("### Brand name\n")
         print(data["label"])
         print("")
@@ -159,7 +158,32 @@ class NameSuggestionIndexCommand(ScrapyCommand):
         print("https://www.wikidata.org/wiki/{}".format(code))
         print("https://www.wikidata.org/wiki/Special:EntityData/{}.json\n".format(code))
         print("### Store finder url(s)\n")
-        process.start() # This results in twisted.internet.error.ReactorNotRestartable; okay fair enough.
+        settings = get_project_settings()
+        settings.set("ITEM_PIPELINES", {})
+        settings.set("FEED_EXPORTERS", {})
+        settings.set("LOG_LEVEL", "ERROR")
+        process = CrawlerProcess(settings)
+        
+        print(website_urls)
+        for website in website_urls:
+            crawler = process.create_crawler(StorefinderDetectorSpider)
+            crawler.signals.connect(print_spider_code, signal=signals.item_scraped)
+            process.crawl(
+                crawler,
+                url=website,
+                brand_wikidata=code,
+            )
+
+
+        # This time we try banishing the start of the crawling to another process, to minimise global state issues.
+        # Does this kind of defeat the purposes of having threads? Mostly, yes. But occasionally we would run
+        # a process with a crawler with multiple urls.
+        # Having it block until it's finished crawling and output the results is what we want.
+        q = Queue()
+        p = Process(target=run_in_background_process, args=(q,process,))
+        p.start()
+        result = q.get()
+        p.join()
 
         print("")
         print("----")
