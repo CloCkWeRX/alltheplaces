@@ -145,7 +145,7 @@ class NameSuggestionIndexCommand(ScrapyCommand):
                 print(e)
                 q.put(e)
 
-        def print_spider_code(self, item):
+        def print_spider_code(item):
             print("Spider detected, woo")
             for base_class in item["spider"].__bases__:
                 if not callable(getattr(base_class, "generate_spider_code")):
