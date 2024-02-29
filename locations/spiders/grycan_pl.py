@@ -1,9 +1,9 @@
 import scrapy
 
 from locations.dict_parser import DictParser
+from locations.storefinders.wp_go_maps import WPGoMapsSpider
 
-
-class GrycanPLSpider(scrapy.Spider):
+class GrycanPLSpider(WPGoMapsSpider):
     name = "grycan_pl"
     item_attributes = {"brand": "Grycan", "brand_wikidata": "Q97372889"}
 

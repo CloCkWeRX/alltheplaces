@@ -25,6 +25,7 @@ class TacototeSpider(scrapy.Spider):
             if re.search(r"/locations-old/.", url):
                 yield scrapy.Request(url, callback=self.parse_city)
 
+    # TODO: Evaluate this for WPGoMapsSpider
     def parse_city(self, response):
         mapid = response.xpath("//@mapid").extract_first()
         param = {"filter": json.dumps({"map_id": mapid})}
