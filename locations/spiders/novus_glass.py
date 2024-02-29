@@ -1,7 +1,10 @@
-from locations.storefinders.wp_store_locator import WPStoreLocatorSpider
+from scrapy.spiders import SitemapSpider
 
+from locations.structured_data_spider import StructuredDataSpider
 
-class NOVUSGlassSpider(WPStoreLocatorSpider):
+class NOVUSGlassSpider(SitemapSpider, StructuredDataSpider):
+    sitemap_urls = ["https://novusglass.com/page-sitemap.xml"]
+    sitemap_rules = [(r"^https:\/\/www\.novusglass\.com\/.*\/shop\/.*$", "parse_sd")]
     name = "novus_glass"
     item_attributes = {
         "brand_wikidata": "Q120636586",
@@ -11,4 +14,3 @@ class NOVUSGlassSpider(WPStoreLocatorSpider):
         "www.novusglass.com",
     ]
     custom_settings = {"ROBOTSTXT_OBEY": False}
-    time_format = "%I:%M %p"
