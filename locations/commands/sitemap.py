@@ -314,7 +314,7 @@ class MySitemapSpider(scrapy.spiders.SitemapSpider):
         r"stores/[^/]+/[^/]+/[^/]+$",
         r"stores\.(.*)/\d+$",
         r"stores\.(.*)/fl/\w+/$",
-        r"stores\.(.*)\/\w-\-.*$"
+        r"stores\.(.*)\/\w-\-.*$",
     ]
     matched_patterns = {}
 
