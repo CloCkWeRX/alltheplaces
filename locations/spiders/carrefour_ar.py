@@ -1,5 +1,6 @@
 import scrapy
 
+from locations.storefinders.vtex_graphql import VtexGraphqlSpider
 from locations.dict_parser import DictParser
 from locations.hours import DAYS_FULL, OpeningHours
 from locations.spiders.carrefour_fr import (
@@ -10,7 +11,7 @@ from locations.spiders.carrefour_fr import (
 )
 
 
-class CarrefourARSpider(scrapy.Spider):
+class CarrefourARSpider(VtexGraphqlSpider):
     name = "carrefour_ar"
     # TODO: I suspect other Carrefour domains have this very same interface
     # TODO: Figure out how to handle change of sha256Hash of persistedQuery.
@@ -25,29 +26,6 @@ class CarrefourARSpider(scrapy.Spider):
         "Maxi": CARREFOUR_SUPERMARKET,
     }
 
-    def parse(self, response):
-        for data in response.json()["data"]["documents"]:
-            o = {}
-            for field in data["fields"]:
-                value = field.get("value", "null")
-                if not value == "null":
-                    o[field["key"]] = value
-            o["name"] = o.get("businessName")
-            o["phone"] = o.get("primaryPhone")
-            o["city"] = o.get("locality")
-            o["state"] = o.get("administrativeArea")
-            item = DictParser.parse(o)
-
-            if not parse_brand_and_category_from_mapping(item, o.get("labels"), self.brands):
-                self.crawler.stats.inc_value(f'atp/carrefour_ar/unknown_brand/{o.get("labels")}')
-
-            oh = OpeningHours()
-            for day in DAYS_FULL:
-                if rule := o.get(day.lower() + "Hours"):
-                    if rule == "Cerrado" or "-" not in rule or "/" in rule or "," in rule:  # Closed
-                        continue
-                    open_time, close_time = rule.split("-")
-                    oh.add_range(day, open_time, close_time)
-            item["opening_hours"] = oh.as_opening_hours()
-
-            yield item
+    def pre_process_item(self, item, o):
+        if not parse_brand_and_category_from_mapping(item, o.get("labels"), self.brands):
+            self.crawler.stats.inc_value(f'atp/carrefour_ar/unknown_brand/{o.get("labels")}')
