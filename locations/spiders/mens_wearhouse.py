@@ -10,6 +10,7 @@ class MensWearhouseSpider(scrapy.Spider):
     start_urls = [
         "https://www.menswearhouse.com/store-locator/directory",
     ]
+    requires_proxy = True
 
     def parse_store(self, response):
         address2 = response.xpath('//span[@itemprop="addressRegion"]/text()').extract_first()
