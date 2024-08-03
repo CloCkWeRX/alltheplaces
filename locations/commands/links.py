@@ -126,14 +126,14 @@ class MySpider(StructuredDataSpider):
             for result in response.xpath(
                 '//a[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "'
                 + label
-                + '")]'
+                + '")]/@href'
             ).getall():
                 self.matching_links.append(result)
 
         if len(self.matching_links) > 0:
             print("Possible storefinder links")
             for link in set(self.matching_links):
-                print(link)
+                print("pipenv run scrapy sf " + link)
 
         yield
 
