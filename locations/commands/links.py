@@ -133,7 +133,10 @@ class MySpider(StructuredDataSpider):
         if len(self.matching_links) > 0:
             print("Possible storefinder links")
             for link in set(self.matching_links):
-                print("pipenv run scrapy sf " + link)
+                if "http" not in link:
+                    print("pipenv run scrapy sf " + self.start_urls[0] + link)
+                else:
+                    print("pipenv run scrapy sf " + link)
 
         yield
 
