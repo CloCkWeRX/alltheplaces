@@ -1,7 +1,7 @@
 from urllib.parse import urlparse
 
 from scrapy import Spider
-from scrapy.item import Item
+from locations.items import Feature
 
 
 class TrackSourcesMiddleware:
@@ -10,8 +10,8 @@ class TrackSourcesMiddleware:
     and overall stats per hostname.
     """
 
-    def _process_item(self, response, item: Item, spider: Spider):
-        if not isinstance(item, Item):
+    def _process_item(self, response, item: Feature, spider: Spider):
+        if not isinstance(item, Feature):
             return
 
         if not item["extras"].get("@source_uri"):
