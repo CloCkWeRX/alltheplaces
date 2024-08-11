@@ -1,6 +1,6 @@
-name: "New Spider: WPStoreLocator"
-description: A spider using the WPStoreLocator storefinder. Makes requests to `wp-admin/admin-ajax.php?action=store_search`
-labels: "Store finder: WPStoreLocator"
+name: "New Spider: Structured Data"
+description: A spider using the Structured Data spider
+labels: "Spider type: Structured Data"
 body:
   - type: input
     attributes:
@@ -17,12 +17,16 @@ body:
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
   - type: input
     attributes:
-      label: Domain
-      description: Top level domain
+      label: Sitemap?
+      description: Is there a sitemap URL? Does it contain the store pages?
   - type: input
     attributes:
-      label: Start URL
-      description: Or a start URL
+      label: Sample store detail URL
+      description: Add a link to an example store detail url, so any url patterns can be checked
+  - type: input
+    attributes:
+      label: Wanted Type
+      description: Visit [validator](https://validator.schema.org/) to discover the type
   - type: textarea
     attributes:
       label: Other detail

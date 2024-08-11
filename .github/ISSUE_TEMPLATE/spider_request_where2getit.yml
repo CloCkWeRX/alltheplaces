@@ -1,6 +1,6 @@
-name: "New Spider: Where2getit"
-description: A spider using the Where2getit storefinder
-labels: "Store finder: Where2getit"
+name: "New Spider: Where2GetIt"
+description: A spider using the Where2GetIt storefinder. Make requests to `https://hosted.where2getit.com/{api_brand_name}/rest/getlist`
+labels: "Store finder: Where2GetIt"
 body:
   - type: input
     attributes:
@@ -15,6 +15,10 @@ body:
       description: >-
         If possible get the ID from
         [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)
+  - type: input
+    attributes:
+      label: API Brand Name
+      description: Extract from an AJAX request for `https://hosted.where2getit.com/{api_brand_name}/rest/getlist`
   - type: textarea
     attributes:
       label: Other detail
