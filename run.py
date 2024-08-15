@@ -1,6 +1,5 @@
 import os.path
 import subprocess
-import random
 
 parts = {}
 files = ["xaa", "xab", "xac", "xad", "xae", "xae", "xaf", "xag", "xah", "xai", "xaj", "xak", "xal"]
@@ -94,7 +93,7 @@ class WebCommons{}Spider(SitemapSpider, StructuredDataSpider):
                     )
                 else:
                     n = n + 1
-                    if n > len(urls)/10:
+                    if n > len(urls) / 10:
                         subprocess.run(
                             ["touch ./locations/spiders/web_data_commons_{}.ignore".format(spider_name)], shell=True
                         )
