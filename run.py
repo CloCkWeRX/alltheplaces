@@ -84,4 +84,3 @@ class WebCommons{}Spider(SitemapSpider, StructuredDataSpider):
             else:
                 subprocess.run(["touch ./locations/spiders/web_data_commons_{}.ignore".format(spider_name)], shell=True)
                 print("Made ./locations/spiders/web_data_commons_{}.ignore".format(spider_name))
-
