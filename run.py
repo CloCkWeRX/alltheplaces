@@ -1,5 +1,6 @@
 import os.path
 import subprocess
+import random
 
 parts = {}
 files = ["xaa", "xab", "xac", "xad", "xae", "xae", "xaf", "xag", "xah", "xai", "xaj", "xak", "xal"]
@@ -28,7 +29,8 @@ for path in files:
                         parts[key] = []
 
 for key, urls in parts.items():
-    if len(urls) > 100:
+    if len(urls) > 1000:
+        n = 0
         for line in urls:
             bits = line.rstrip().split("/")
             spider_name = bits[2].replace(".", "_")
@@ -44,7 +46,7 @@ for key, urls in parts.items():
             else:
                 result = subprocess.run(["pipenv run scrapy sd " + line], capture_output=True, shell=True)
                 lines = result.stdout.splitlines()
-                if len(lines) > 5:
+                if len(lines) > 1:
                     print(lines)
                     auto_detect = subprocess.run(
                         ["pipenv run scrapy sf " + line], capture_output=True, shell=True
@@ -91,7 +93,9 @@ class WebCommons{}Spider(SitemapSpider, StructuredDataSpider):
                         shell=True,
                     )
                 else:
-                    subprocess.run(
-                        ["touch ./locations/spiders/web_data_commons_{}.ignore".format(spider_name)], shell=True
-                    )
-                    print("Made ./locations/spiders/web_data_commons_{}.ignore".format(spider_name))
+                    n = n + 1
+                    if n > len(urls)/10:
+                        subprocess.run(
+                            ["touch ./locations/spiders/web_data_commons_{}.ignore".format(spider_name)], shell=True
+                        )
+                        print("Made ./locations/spiders/web_data_commons_{}.ignore for {}".format(spider_name, line))
