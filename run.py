@@ -55,13 +55,21 @@ for key, urls in parts.items():
 
                     if len(auto_detect) > 1:
                         subprocess.run(
-                            ["""echo '{}' > locations/spiders/sf_1_{}.py""".format("\n".join(auto_detect), spider_name)],
+                            [
+                                """echo '{}' > locations/spiders/sf_1_{}.py""".format(
+                                    "\n".join(auto_detect), spider_name
+                                )
+                            ],
                             shell=True,
                         )
 
                     if len(auto_detect2) > 1:
                         subprocess.run(
-                            ["""echo '{}' > locations/spiders/sf_2_{}.py""".format("\n".join(auto_detect2), spider_name)],
+                            [
+                                """echo '{}' > locations/spiders/sf_2_{}.py""".format(
+                                    "\n".join(auto_detect2), spider_name
+                                )
+                            ],
                             shell=True,
                         )
                     subprocess.run(
@@ -83,5 +91,7 @@ class WebCommons{}Spider(SitemapSpider, StructuredDataSpider):
                         shell=True,
                     )
                 else:
-                    subprocess.run(["touch ./locations/spiders/web_data_commons_{}.ignore".format(spider_name)], shell=True)
+                    subprocess.run(
+                        ["touch ./locations/spiders/web_data_commons_{}.ignore".format(spider_name)], shell=True
+                    )
                     print("Made ./locations/spiders/web_data_commons_{}.ignore".format(spider_name))
