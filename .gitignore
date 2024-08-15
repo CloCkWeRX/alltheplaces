@@ -111,3 +111,5 @@ ENV/
 commands.txt
 http_cache.sqlite
 http_cache/
+
+*.ignore

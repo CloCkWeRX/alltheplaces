@@ -22,6 +22,8 @@ for path in files:
                         continue
                     elif os.path.isfile("./locations/spiders/web_data_commons_{}.py".format(spider_name)):
                         continue
+                    elif os.path.isfile("./locations/spiders/web_data_commons_{}.ignore".format(spider_name)):
+                        continue
                     else:
                         parts[key] = []
 
@@ -36,12 +38,14 @@ for key, urls in parts.items():
             continue
         elif os.path.isfile("./locations/spiders/web_data_commons_{}.py".format(spider_name)):
             continue
+        elif os.path.isfile("./locations/spiders/web_data_commons_{}.ignore".format(spider_name)):
+            continue
         else:
             print(line)
             result = subprocess.run(["pipenv run scrapy sd " + line], capture_output=True, shell=True)
             lines = result.stdout.splitlines()
             if len(lines) <= 2:
-                subprocess.run(["touch ./locations/spiders/web_data_commons_{}.py".format(spider_name)], shell=True)
+                subprocess.run(["touch ./locations/spiders/web_data_commons_{}.ignore".format(spider_name)], shell=True)
             elif len(lines) > 2:
                 print(lines)
                 auto_detect = subprocess.run(
