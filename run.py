@@ -2,7 +2,7 @@ import os.path
 import subprocess
 
 parts = {}
-files = [ "xaa", "xab", "xac", "xad", "xae", "xae", "xaf", "xag", "xah", "xai", "xaj", "xak", "xal"]
+files = ["xaa", "xab", "xac", "xad", "xae", "xae", "xaf", "xag", "xah", "xai", "xaj", "xak", "xal"]
 
 print("Loading into memory")
 for path in files:
@@ -53,26 +53,18 @@ for key, urls in parts.items():
 
                 if len(auto_detect) > 1:
                     subprocess.run(
-                        [
-                            """echo '{}' > locations/spiders/sf_1_{}.py""".format(
-                                "\n".join(auto_detect), spider_name
-                            )
-                        ],
+                        ["""echo '{}' > locations/spiders/sf_1_{}.py""".format("\n".join(auto_detect), spider_name)],
                         shell=True,
                     )
 
                 if len(auto_detect2) > 1:
                     subprocess.run(
-                        [
-                            """echo '{}' > locations/spiders/sf_2_{}.py""".format(
-                                "\n".join(auto_detect2), spider_name
-                            )
-                        ],
+                        ["""echo '{}' > locations/spiders/sf_2_{}.py""".format("\n".join(auto_detect2), spider_name)],
                         shell=True,
                     )
                 subprocess.run(
-                                [
-                                """echo 'from scrapy.spiders import SitemapSpider
+                    [
+                        """echo 'from scrapy.spiders import SitemapSpider
 
 from locations.structured_data_spider import StructuredDataSpider
 
@@ -83,8 +75,8 @@ class WebCommons{}Spider(SitemapSpider, StructuredDataSpider):
     wanted_types = ["LocalBusiness"]
 ' > locations/spiders/web_commons_{}.py
 """.format(
-                                            spider_name, spider_name, key, spider_name
-                                        )
-                                    ],
-                                    shell=True,
-                                )
+                            spider_name, spider_name, key, spider_name
+                        )
+                    ],
+                    shell=True,
+                )
