@@ -41,12 +41,9 @@ for key, urls in parts.items():
         elif os.path.isfile("./locations/spiders/web_data_commons_{}.ignore".format(spider_name)):
             continue
         else:
-            print(line)
             result = subprocess.run(["pipenv run scrapy sd " + line], capture_output=True, shell=True)
             lines = result.stdout.splitlines()
-            if len(lines) <= 2:
-                subprocess.run(["touch ./locations/spiders/web_data_commons_{}.ignore".format(spider_name)], shell=True)
-            elif len(lines) > 2:
+            if len(lines) > 5:
                 print(lines)
                 auto_detect = subprocess.run(
                     ["pipenv run scrapy sf " + line], capture_output=True, shell=True
@@ -74,13 +71,17 @@ from locations.structured_data_spider import StructuredDataSpider
 
 
 class WebCommons{}Spider(SitemapSpider, StructuredDataSpider):
-    name = "web_commons_{}"
+    name = "web_data_commons_{}"
     sitemap_urls = ["{}/robots.txt"]
     wanted_types = ["LocalBusiness"]
-' > locations/spiders/web_commons_{}.py
+' > locations/spiders/web_data_commons_{}.py
 """.format(
                             spider_name, spider_name, key, spider_name
                         )
                     ],
                     shell=True,
                 )
+            else:
+                subprocess.run(["touch ./locations/spiders/web_data_commons_{}.ignore".format(spider_name)], shell=True)
+                print("Made ./locations/spiders/web_data_commons_{}.ignore".format(spider_name))
+
