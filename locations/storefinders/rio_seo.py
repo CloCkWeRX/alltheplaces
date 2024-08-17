@@ -12,21 +12,29 @@ from locations.hours import OpeningHours
 from locations.items import Feature
 from locations.pipelines.address_clean_up import merge_address_lines
 
-# To use this spider, specify one or more start_urls which have a path of:
-# /api/getAsyncLocations. Include arguments such as
-# ?template=search&level=search...etc
-
 
 class RioSeoSpider(Spider, AutomaticSpiderGenerator):
+    """
+    RioSEO is a number of related storefinders.
+    https://www.rioseo.com/platform/local-pages/
+
+    To use, specify:
+      - `end_point`: mandatory parameter, should be a URL containing the path
+        `/api/getAsyncLocations` and including parameters similar to
+        `?template=search&level=search`
+      - `radius`: optional parameter, default value is 10000
+      - `limit`: optional parameter, default valus is 3000
+    """
+
     dataset_attributes = {"source": "api", "api": "rio_seo"}
+    end_point: str = None
+    radius: int = 10000
+    limit: int = 3000
     detection_rules = [
         DetectionRequestRule(
             url=r"^(?P<start_urls__list>https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/api\/getAsyncLocations\?.+)$"
         )
     ]
-    end_point: str = None
-    radius: int = 10000
-    limit: int = 3000
 
     def start_requests(self) -> Iterable[Request]:
         if self.start_urls:

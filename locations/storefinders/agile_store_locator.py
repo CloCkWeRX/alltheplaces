@@ -25,12 +25,12 @@ from locations.items import Feature
 
 
 class AgileStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
+    time_format = "%I:%M%p"
     detection_rules = [
         DetectionRequestRule(
             url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/wp-admin\/admin-ajax\.php\?.*?(?<=[?&])action=asl_load_stores(?:&|$)"
         ),
     ]
-    time_format = "%I:%M%p"
 
     def start_requests(self):
         if len(self.start_urls) == 0 and hasattr(self, "allowed_domains"):
