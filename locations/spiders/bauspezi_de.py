@@ -1,4 +1,6 @@
-class BauspeziDESpider(WPGoMapsSpider):
+from locations.storefinders.wp_go_maps import WpGoMapsSpider
+
+class BauspeziDESpider(WpGoMapsSpider):
     name = "bauspezi_de"
     item_attributes = {
         "brand_wikidata": "Q85324366",
