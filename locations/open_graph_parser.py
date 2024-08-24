@@ -20,5 +20,7 @@ class OpenGraphParser:
             item["ref"] = response.url
         return item
 
-    def parse(self, response) -> Feature:
-        return self.as_item(self.extract_properties(response), response)
+    @staticmethod
+    def parse(response) -> Feature:
+        og = OpenGraphParser()
+        return og.as_item(og.extract_properties(response), response)
