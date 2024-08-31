@@ -3,15 +3,11 @@ from typing import Iterable
 from scrapy import Request, Selector, Spider
 from scrapy.http import Response
 
-from scrapy import Request, Spider
-from scrapy.http import Response
-
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule
 from locations.dict_parser import DictParser
 from locations.items import Feature
 
 
-<<<<<<< HEAD
 class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     """
     This store finder is provided as an extension either for Magento v1 or
@@ -32,6 +28,7 @@ class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     overriding the pre_process_data and/or post_process_item functions of this
     spider.
     """
+
     detection_rules = [
         DetectionRequestRule(url=r"^https?:\/\/(?P<allowed_domains__list>[A-Za-z0-9\-.]+)\/amlocator\/index\/ajax\/?"),
         DetectionRequestRule(
