@@ -10,15 +10,6 @@ from locations.dict_parser import DictParser
 from locations.hours import OpeningHours
 from locations.items import Feature
 
-# Documentation available at:
-# 1. https://aheadworks.com/store-locator-extension-for-magento-1
-# 2. https://aheadworks.com/store-locator-extension-for-magento-2
-#
-# To use this spider, supply a 'start_url' for the store finder page that
-# contains embedded JavaScript with a complete store list. The 'parse_item'
-# method can be overridden if changes to extracted data is necessary, for
-# example, to clean up location names.
-
 
 class AheadworksSpider(Spider, AutomaticSpiderGenerator):
     """
