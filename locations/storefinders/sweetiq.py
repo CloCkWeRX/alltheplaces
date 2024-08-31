@@ -95,23 +95,3 @@ class SweetIQSpider(Spider, AutomaticSpiderGenerator):
 
     def pre_process_data(self, location, **kwargs):
         """Override with any pre-processing on the item."""
-
-    def storefinder_exists(response: Response) -> bool | Request:
-        # Example: https://locations.thepaperstore.com/
-        if response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]').get():
-            return True
-
-        if response.xpath('//script[contains(@src, "sls-cdn.sweetiq.com")]').get():
-            return True
-
-        return False
-
-    def extract_spider_attributes(response: Response) -> dict | Request:
-        attribs = {
-            "allowed_domains": [urlparse(response.url).netloc],
-        }
-
-        if response.xpath('//script[contains(text(), "__SLS_REDUX_STATE__")]').get():
-            attribs["start_urls"] = [response.url]
-
-        return attribs
