@@ -33,6 +33,7 @@ class Categories(Enum):
     ENFORCEMENT_TRAFFIC_SIGNALS = {"enforcement": "traffic_signals"}
 
     CRAFT_CARPENTER = {"craft": "carpenter"}
+    CRAFT_CATERER = {"craft": "caterer"}
     CRAFT_CLOCKMAKER = {"craft": "clockmaker"}
     CRAFT_ELECTRONICS_REPAIR = {"craft": "electronics_repair"}
     CRAFT_JEWELLER = {"craft": "jeweller"}
@@ -47,6 +48,7 @@ class Categories(Enum):
 
     LEISURE_PLAYGROUND = {"leisure": "playground"}
     LEISURE_RESORT = {"leisure": "resort"}
+    LEISURE_PARK = {"leisure": "park"}
 
     SHOP_AGRARIAN = {"shop": "agrarian"}
     SHOP_ALCOHOL = {"shop": "alcohol"}
@@ -182,6 +184,7 @@ class Categories(Enum):
     SHOP_TRADE = {"shop": "trade"}
     SHOP_TRAVEL_AGENCY = {"shop": "travel_agency"}
     SHOP_TRUCK = {"shop": "truck"}
+    SHOP_TRUCK_PARTS = {"shop": "truck_parts"}
     SHOP_TRUCK_REPAIR = {"shop": "truck_repair"}
     SHOP_TYRES = {"shop": "tyres"}
     SHOP_VACUUM_CLEANER = {"shop": "vacuum_cleaner"}
@@ -259,6 +262,7 @@ class Categories(Enum):
     POST_BOX = {"amenity": "post_box"}
     POST_DEPOT = {"amenity": "post_depot"}
     POST_OFFICE = {"amenity": "post_office"}
+    POST_PARTNER = {"post_office": "post_partner"}
     PREP_SCHOOL = {"amenity": "prep_school"}
     PRODUCT_PICKUP = {"amenity": "product_pickup"}
     PSYCHOTHERAPIST = {"healthcare": "psychotherapist"}
@@ -451,10 +455,12 @@ class Extras(Enum):
     ATM = "atm"
     BABY_CHANGING_TABLE = "changing_table"
     BACKUP_GENERATOR = "backup_generator"
+    BAR = "bar"
     BARBEQUES = "bbq"
     BREAKFAST = "breakfast"
     CALLING = "service:phone"
     CAR_WASH = "car_wash"
+    CAR_REPAIR = "service:vehicle:car_repair"
     CARAVAN_SITES = "caravans"
     CASH_IN = "cash_in"
     CASH_OUT = "cash_out"
@@ -492,6 +498,7 @@ class Extras(Enum):
     TOILETS = "toilets"
     TOILETS_WHEELCHAIR = "toilets:wheelchair"
     TRUCK_WASH = "truck_wash"
+    TYRE_SERVICES = "service:vehicle:tyres"
     VACUUM_CLEANER = "vacuum_cleaner"
     WHEELCHAIR = "wheelchair"
     WIFI = "internet_access=wlan"
