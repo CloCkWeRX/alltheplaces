@@ -52,6 +52,9 @@ class WpGoMapsSpider(Spider, AutomaticSpiderGenerator):
         ),
     ]
 
+    start_urls = []
+    allowed_domains = []
+
     def start_requests(self) -> Iterable[Request]:
         urls = self.start_urls
         if len(self.start_urls) == 0:
