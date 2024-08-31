@@ -1,8 +1,6 @@
-from urllib.parse import urlparse
-
 import chompjs
 from scrapy import Request, Spider
-from scrapy.http import JsonRequest, Response
+from scrapy.http import JsonRequest
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionResponseRule
 from locations.categories import PaymentMethods, apply_yes_no
