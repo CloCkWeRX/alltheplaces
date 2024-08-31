@@ -69,16 +69,3 @@ class AmastyStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     def post_process_item(self, item: Feature, feature: dict, popup_html: Selector) -> Iterable[Feature]:
         """Override with any post-processing on the item."""
         yield item
-
-    def storefinder_exists(response: Response) -> bool | Request:
-        # Example: https://www.aussiedisposals.com.au/store-locator/
-        # Example: https://www.lcbo.com/en/stores/
-        if response.xpath('//script[contains(text(), "/amlocator/index/ajax/")]/text()').get():
-            return True
-
-        return False
-
-    def extract_spider_attributes(response: Response) -> dict | Request:
-        return {
-            "allowed_domains": [urlparse(response.url).netloc],
-        }
