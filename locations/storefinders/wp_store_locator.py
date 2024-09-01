@@ -1,5 +1,7 @@
+from typing import Iterable
+
 from scrapy import Selector, Spider
-from scrapy.http import JsonRequest
+from scrapy.http import JsonRequest, Response
 
 from locations.automatic_spider_generator import AutomaticSpiderGenerator, DetectionRequestRule, DetectionResponseRule
 from locations.dict_parser import DictParser
@@ -73,7 +75,6 @@ from locations.pipelines.address_clean_up import merge_address_lines
 
 class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
     days: dict = None
-    time_format: str = "%H:%M"
     iseadgg_countries_list: list[str] = []
     searchable_points_files: list[str] = []
     search_radius: int = 0
@@ -106,7 +107,7 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
         else:
             yield from self.start_requests_all_at_once_method()
 
-    def start_requests_all_at_once_method(self):
+    def start_requests_all_at_once_method(self) -> Iterable[JsonRequest]:
         """
         PREFERRED all-results-at-once method requiring only a
         single API call to the API endpoint. May be disabled
@@ -120,7 +121,7 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
             for url in self.start_urls:
                 yield JsonRequest(url=url)
 
-    def start_requests_geo_search_iseadgg_method(self):
+    def start_requests_geo_search_iseadgg_method(self) -> Iterable[JsonRequest]:
         """
         NONPREFERRED geographic radius search method with
         PREFERRED ISEADGG method of specifying centroids.
@@ -155,7 +156,7 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
                         url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
                     )
 
-    def start_requests_geo_search_manual_method(self):
+    def start_requests_geo_search_manual_method(self) -> Iterable[JsonRequest]:
         """
         NONPREFERRED geographic radius search method with
         NONPREFERRED searchable_points_file method of
@@ -174,28 +175,29 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
                             url=f"{url}&lat={lat}&lng={lon}&max_results={self.max_results}&search_radius={self.search_radius}"
                         )
 
-    def parse(self, response, **kwargs):
+    def parse(self, response: Response) -> Iterable[Feature]:
         if response.text.strip():
-            locations = response.json()
+            features = response.json()
         else:
             # Empty pages are sometimes returned when there are no features
             # nearby a specified WGS84 coordinate.
-            locations = []
+            features = []
 
         if self.max_results > 0:
-            if len(locations) >= self.max_results:
-                raise RuntimeError(
-                    "Locations have probably been truncated due to max_results (or more) locations being returned by a single geographic radius search. Use a smaller search_radius."
-                )
-
-            if len(locations) > 0:
+            if len(features) > 0:
                 self.crawler.stats.inc_value("atp/geo_search/hits")
             else:
                 self.crawler.stats.inc_value("atp/geo_search/misses")
-            self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(locations))
+            self.crawler.stats.max_value("atp/geo_search/max_features_returned", len(features))
 
-        for location in locations:
-            item = DictParser.parse(location)
+            if len(features) >= self.max_results:
+                raise RuntimeError(
+                    "Locations have probably been truncated due to max_results (or more) features being returned by a single geographic radius search. Use a smaller search_radius."
+                )
+
+        for feature in features:
+            self.pre_process_data(feature)
+            item = DictParser.parse(feature)
             item.pop("addr_full", None)
             item["street_address"] = merge_address_lines([location.get("address"), location.get("address2")])
             item["name"] = location["store"]
@@ -215,7 +217,19 @@ class WPStoreLocatorSpider(Spider, AutomaticSpiderGenerator):
                             self.days = days
                             break
 
-            yield from self.parse_item(item, location) or []
+            if self.days is not None:
+                # If we have preconfigured the exact days to use, start there
+                item["opening_hours"] = self.parse_opening_hours(feature, self.days)
+            else:
+                # Otherwise, iterate over the possibilities until we get a first match
+                self.logger.warning(
+                    "Attempting to detect opening hours - specify self.days = DAYS_EN or the appropriate language code to suppress this warning"
+                )
+                for days in self.possible_days:
+                    item["opening_hours"] = self.parse_opening_hours(feature, days)
+                    if item["opening_hours"] is not None:
+                        self.days = days
+                        break
 
     def parse_item(self, item: Feature, location: dict):
         yield item
