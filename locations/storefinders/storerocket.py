@@ -8,6 +8,16 @@ from locations.items import Feature, SocialMedia, set_social_media
 
 
 class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
+    """
+    StoreRocket is a map based JSON API driven store locator.
+    https://storerocket.io/
+
+    To use, specify:
+      - `storerocket_id`: mandatory parameter
+      - `base_url`: optional parameter, sets the base URL for individual
+        location pages (which may be provided as a URL slug by this API)
+    """
+
     dataset_attributes = {"source": "api", "api": "storerocket.io"}
     storerocket_id: str = ""
     base_url: str | None = None
@@ -29,6 +39,7 @@ class StoreRocketSpider(Spider, AutomaticSpiderGenerator):
             item = DictParser.parse(location)
 
             item["street_address"] = ", ".join(filter(None, [location["address_line_1"], location["address_line_2"]]))
+            item["email"] = location.get("email")
 
             set_social_media(item, SocialMedia.FACEBOOK, location.get("facebook"))
             set_social_media(item, SocialMedia.INSTAGRAM, location.get("instagram"))
