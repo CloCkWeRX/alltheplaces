@@ -7,6 +7,10 @@ from locations.hours import DAYS_FULL, OpeningHours
 # To use this spider, specify one or more start_urls which have a domain of
 # www.locally.com or brandname.locally.com and path of /stores/conversion_data
 # Include all arguments in the URL.
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5dfc5bee0ab432e46f9b4a67b86bd95a53904d57
 
 
 class LocallySpider(Spider, AutomaticSpiderGenerator):
@@ -28,7 +32,6 @@ class LocallySpider(Spider, AutomaticSpiderGenerator):
         for location in response.json()["markers"]:
             self.pre_process_data(location)
             item = DictParser.parse(location)
-
             item["opening_hours"] = OpeningHours()
             for day in DAYS_FULL:
                 open = f"{day[:3].lower()}_time_open"
