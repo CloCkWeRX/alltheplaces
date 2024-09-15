@@ -98,7 +98,21 @@ class NSI(metaclass=Singleton):
                 if label_to_find_fuzzy in nsi_label_fuzzy:
                     yield k, v
 
-    def iter_nsi(self, wikidata_code: str = None) -> Iterable[dict]:
+    def iter_country(self, location_code=None):
+        """
+        Lookup by country code match in the NSI.
+        :param location_code: country code or NSI location to search for
+        :return: iterator of matching NSI wikidata.json entries
+        """
+        self._ensure_loaded()
+        for v in self.nsi_json.values():
+            for item in v["items"]:
+                if not location_code:
+                    yield item
+                elif location_code.lower() in item["locationSet"].get("include"):
+                    yield item
+
+    def iter_nsi(self, wikidata_code=None):
         """
         Iterate NSI for all items in nsi.json with a matching wikidata code
         :param wikidata_code: wikidata code to match, if None then all entries
