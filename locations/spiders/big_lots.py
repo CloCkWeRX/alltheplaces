@@ -18,4 +18,5 @@ class BigLotsSpider(scrapy.spiders.SitemapSpider):
     def parse(self, response):
         MicrodataParser.convert_to_json_ld(response)
         item = LinkedDataParser.parse(response, "Store")
+        item["image"] = None
         yield item
