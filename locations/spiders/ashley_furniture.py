@@ -13,3 +13,4 @@ class AshleyFurnitureSpider(scrapy.spiders.SitemapSpider):
         if item := LinkedDataParser.parse(response, "FurnitureStore"):
             item["ref"] = response.url
             yield item
+    drop_attributes = {"image"}
